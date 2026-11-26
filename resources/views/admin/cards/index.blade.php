@@ -5,9 +5,17 @@
 @section('content')
     <x-page-header title="Kartu Anggota" subtitle="Kelola kartu perpustakaan, status kehilangan, dan penggantian kartu.">
         <x-slot:actions>
-            <a href="{{ route('admin.cards.create') }}" class="btn btn-primary">
+            <a href="{{ route('cards.export') }}" class="btn btn-success" title="Ekspor Data Kartu">
+                <x-icon name="download" class="h-4 w-4" />
+                Ekspor Semua
+            </a>
+            <a href="{{ route('admin.cards.destroy-all') }}" class="btn btn-danger" onclick="return confirm('Yakin menghapus semua kartu anggota?')">
+                <x-icon name="trash" class="h-4 w-4" />
+                Hapus Semua
+            </a>
+            <a href="{{ route('admin.users.index') }}" class="btn btn-primary">
                 <x-icon name="plus" class="h-4 w-4" />
-                Buat Akun &amp; Kartu
+                Tambah Kartu
             </a>
         </x-slot:actions>
     </x-page-header>
@@ -33,7 +41,7 @@
     @if ($cards->isEmpty())
         <x-empty-state title="Belum ada kartu" description="Buat akun pengguna untuk menerbitkan kartu anggota pertama." icon="card">
             <x-slot:action>
-                <a href="{{ route('admin.cards.create') }}" class="btn btn-primary">Buat Akun</a>
+                <a href="{{ route('admin.users.index') }}" class="btn btn-primary">Tambah Kartu</a>
             </x-slot:action>
         </x-empty-state>
     @else
@@ -46,7 +54,6 @@
                             <p class="text-[0.62rem] font-semibold uppercase tracking-[0.2em] text-muted">Perpusa Member Card</p>
                             <p class="mt-1 font-mono text-sm font-bold text-ink">{{ $card->card_number }}</p>
                         </div>
-                        <x-status-badge :status="$card->status" />
                     </div>
 
                     <div class="relative mt-4 flex items-center gap-3 rounded-xl border border-line bg-white/[0.02] p-3">
@@ -55,12 +62,6 @@
                         </span>
                         <div class="min-w-0">
                             <p class="truncate text-sm font-semibold text-ink">{{ $card->user?->name }}</p>
-                            <p class="truncate text-xs text-muted">
-                                @ {{ $card->user?->username }}
-                                @if ($card->user?->nickname)
-                                    · {{ $card->user->nickname }}
-                                @endif
-                            </p>
                         </div>
                     </div>
 
@@ -75,39 +76,15 @@
                             <dt class="text-muted">Sekolah</dt>
                             <dd class="text-body">{{ $card->user?->school ?: '—' }}</dd>
                         </div>
-                        <div class="col-span-2">
-                            <dt class="text-muted">Kontak (urutan prioritas)</dt>
-                            <dd class="space-y-1 text-body">
-                                @forelse ($card->user?->contactChannels() ?? [] as $channel)
-                                    <p class="truncate"><span class="text-muted">{{ $channel['label'] }}:</span> {{ $channel['value'] }}</p>
-                                @empty
-                                    <p>—</p>
-                                @endforelse
-                            </dd>
-                        </div>
-                        <div>
-                            <dt class="text-muted">Terbit</dt>
-                            <dd class="text-body">{{ $card->issued_at?->translatedFormat('d M Y') }}</dd>
-                        </div>
-                        <div>
-                            <dt class="text-muted">Status akun</dt>
-                            <dd class="{{ $card->user?->is_active ? 'text-success' : 'text-danger' }}">
-                                {{ $card->user?->is_active ? 'Aktif' : 'Nonaktif' }}
-                            </dd>
-                        </div>
                     </dl>
 
                     <div class="relative mt-4 flex flex-wrap items-center gap-2 border-t border-line/70 pt-3">
-                        <a href="{{ route('admin.cards.edit', $card) }}" class="btn btn-ghost btn-sm">
-                            <x-icon name="edit" class="h-3.5 w-3.5" />
-                            Ubah
-                        </a>
                         @if ($card->status === 'active')
-                            <form method="POST" action="{{ route('admin.cards.lost', $card) }}" data-confirm="Tandai kartu ini hilang? Akun pengguna akan dinonaktifkan.">
+                            <form method="POST" action="{{ route('admin.cards.completed', $card) }}" data-confirm="Tandai kartu ini selesai/dibuat? Akun pengguna akan tetap aktif.">
                                 @csrf
                                 <button type="submit" class="btn btn-danger btn-sm">
-                                    <x-icon name="alert" class="h-3.5 w-3.5" />
-                                    Tandai Hilang
+                                    <x-icon name="trash" class="h-3.5 w-3.5" />
+                                    Selesai
                                 </button>
                             </form>
                         @else
@@ -120,9 +97,6 @@
                             </form>
                         @endif
                         <span class="ml-auto text-[0.68rem] text-muted">
-                            {{ $card->note ?: 'Kartu aktif' }}
-                        </span>
-                    </div>
                 </article>
             @endforeach
         </div>
@@ -130,3 +104,6 @@
         {{ $cards->links('partials.pagination') }}
     @endif
 @endsection
+
+<script>
+</script>

@@ -18,11 +18,10 @@ class UserController extends Controller
     public function index(Request $request): View
     {
         return view('admin.users.index', [
-            'users' => User::query()
-                ->with('memberCard')
+            'users' => User::with('memberCard')
                 ->when($request->string('q')->toString(), function ($query, string $q): void {
-                    $query->whereLike('name', '%'.$q.'%')
-                        ->orWhereLike('username', '%'.$q.'%');
+                    $query->where('name', 'like', '%'.$q.'%')
+                        ->orWhere('username', 'like', '%'.$q.'%');
                 })
                 ->latest()
                 ->paginate(12)
@@ -46,38 +45,32 @@ class UserController extends Controller
             $this->memberCards->issue($user);
         }
 
-        return redirect()->route('admin.users.index')->with('success', 'Akun berhasil dibuat.');
+        return redirect()->route('admin.users.index')->with('success', 'Akun berhasil dibuat. Kartu anggota dibuat otomatis.');
     }
 
     public function edit(User $user): View
     {
-        $user->load('memberCard');
-
         return view('admin.users.edit', ['user' => $user]);
     }
 
     public function update(UpdateUserRequest $request, User $user): RedirectResponse
     {
         $data = $request->validated();
-        $password = $data['password'] ?? null;
-        $previousRole = $user->role;
 
-        unset($data['password']);
+        $user->update($data);
 
-        $user->fill($data);
+        return redirect()->route('admin.users.index')->with('success', 'Data pengguna berhasil diperbarui.');
+    }
 
-        if ($password !== null && $password !== '') {
-            $user->password = $password;
-        }
+    public function detail(User $user): View
+    {
+        return view('admin.users.detail', ['user' => $user]);
+    }
 
-        $user->save();
+    public function destroy(Request $request, User $user): RedirectResponse
+    {
+        $user->delete();
 
-        if ($user->isMember() && $previousRole !== User::ROLE_USER && ! $user->memberCard()->exists()) {
-            $this->memberCards->issue($user);
-        } elseif ($user->isAdmin() && $previousRole === User::ROLE_USER) {
-            $user->memberCard()->delete();
-        }
-
-        return redirect()->route('admin.users.index')->with('success', 'Akun berhasil diperbarui.');
+        return redirect()->route('admin.users.index')->with('success', 'Akun berhasil dihapus.');
     }
 }

@@ -79,4 +79,57 @@ class CardController extends Controller
 
         return back()->with('success', 'Kartu baru diterbitkan: '.$replacement->card_number.'. Akun pengguna diaktifkan kembali.');
     }
+
+    public function destroyAll(): RedirectResponse
+    {
+        MemberCard::query()->delete();
+
+        return redirect()->route('admin.cards.index')->with('success', 'Semua kartu anggota telah dihapus.');
+    }
+
+    public function destroySelected(Request $request): RedirectResponse
+    {
+        $cardIds = $request->input('card_ids', []);
+
+        if (! $cardIds) {
+            return back()->with('error', 'Tidak ada kartu yang dipilih.');
+        }
+
+        MemberCard::whereIn('id', $cardIds)->delete();
+
+        return back()->with('success', 'Berhasil menghapus '.count($cardIds).' kartu anggota.');
+    }
+
+    public function markCompleted(MemberCard $card): RedirectResponse
+    {
+        $this->memberCards->deleteCard($card);
+
+        return back()->with('success', "Kartu {$card->card_number} berhasil dihapus.");
+    }
+
+    public function markCompletedAll(Request $request): RedirectResponse
+    {
+        $cardIds = $request->input('card_ids', []);
+
+        if (! $cardIds) {
+            return back()->with('error', 'Tidak ada kartu yang dipilih.');
+        }
+
+        MemberCard::whereIn('id', $cardIds)->each(function ($card): void {
+            $this->memberCards->markCompleted($card);
+        });
+
+        return back()->with('success', 'Berhasil menandai '.count($cardIds).' kartu sebagai selesai.');
+    }
+
+    public function issue(User $user): RedirectResponse
+    {
+        if ($user->isAdmin()) {
+            return back()->with('error', 'Akun admin tidak memerlukan kartu anggota.');
+        }
+
+        $card = $this->memberCards->issue($user);
+
+        return redirect()->route('admin.cards.index')->with('success', 'Kartu anggota berhasil diterbitkan untuk '.$user->name.'. Nomor kartu: '.$card->card_number.'.');
+    }
 }

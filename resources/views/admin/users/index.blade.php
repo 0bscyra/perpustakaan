@@ -85,6 +85,16 @@
                                         <x-icon name="edit" class="h-3.5 w-3.5" />
                                         Ubah
                                     </a>
+                                    <a href="{{ route('admin.users.detail', $user) }}" class="btn btn-ghost btn-sm text-primary" aria-label="Detail {{ $user->name }}">
+                                        <x-icon name="eye" class="h-3.5 w-3.5" />
+                                        Detail
+                                    </a>
+                                    <form method="GET" action="{{ route('admin.cards.issue', $user) }}" class="btn btn-ghost btn-sm text-success" style="width: auto;">
+                                        <button type="submit" class="flex items-center gap-1">
+                                            <x-icon name="plus" class="h-3.5 w-3.5" />
+                                            Tambah Kartu
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         @endforeach

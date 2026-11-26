@@ -22,6 +22,7 @@ return new class extends Migration
             $table->text('address')->nullable();
             $table->rememberToken();
             $table->timestamps();
+            // $user = new App\Models\User(['username' => 'admin', 'name' => 'admin', 'password' => 'admin', 'role' => 'admin']);
         });
 
         Schema::create('sessions', function (Blueprint $table) {
@@ -43,3 +44,5 @@ return new class extends Migration
         Schema::dropIfExists('users');
     }
 };
+
+// hujan8084 irfanependi

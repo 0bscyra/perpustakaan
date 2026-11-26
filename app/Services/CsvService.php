@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class CsvService
 {
-    public const TYPES = ['books', 'users'];
+    public const TYPES = ['books', 'users', 'cards'];
 
     /**
      * @return array<int, string>
@@ -23,6 +23,7 @@ class CsvService
         return match ($type) {
             'books' => ['title', 'genre', 'publisher', 'author', 'isbn', 'description', 'editor_pick', 'award_winner', 'public_figure_pick', 'social_trend', 'themes'],
             'users' => ['username', 'name', 'role', 'is_active', 'phone', 'address', 'password'],
+            'cards' => ['card_number', 'user_name', 'user_username', 'birth_place', 'birth_date', 'school', 'status', 'issued_at'],
             default => [],
         };
     }
@@ -53,6 +54,25 @@ class CsvService
                                 $book->public_figure_pick ? 1 : 0,
                                 $book->social_trend ? 1 : 0,
                                 implode('|', $book->themes),
+                            ]);
+                        }
+                    });
+            } elseif ($type === 'cards') {
+                MemberCard::query()
+                    ->with(['user'])
+                    ->orderBy('id')
+                    ->chunk(200, function ($cards) use ($handle): void {
+                        foreach ($cards as $card) {
+                            $user = $card->user;
+                            fputcsv($handle, [
+                                $card->card_number,
+                                $user?->name,
+                                $user?->username,
+                                $user?->birth_place,
+                                $user?->birth_date?->format('Y-m-d'),
+                                $user?->school,
+                                $card->status,
+                                $card->issued_at?->format('Y-m-d'),
                             ]);
                         }
                     });

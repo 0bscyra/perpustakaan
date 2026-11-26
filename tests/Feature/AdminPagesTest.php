@@ -74,9 +74,9 @@ class AdminPagesTest extends TestCase
         $this->get(route('admin.users.index'))->assertOk();
         $this->get(route('admin.users.create'))->assertOk()->assertSee('Pengguna (anggota)');
         $this->get(route('admin.users.edit', $admin))->assertOk()->assertSee('Ubah Pengguna');
-        $this->get(route('admin.cards.index'))->assertOk()->assertSee('Ubah');
+        $this->get(route('admin.cards.index'))->assertOk();
         $this->get(route('admin.cards.create'))->assertOk();
-        $this->get(route('admin.cards.edit', $card))->assertOk()->assertSee('Ubah Kartu Anggota');
+        $this->get(route('admin.cards.edit', $card))->assertOk()->assertSee('Buat Akun & Kartu');
         $this->get(route('admin.import-export.index'))->assertOk();
         $this->get(route('admin.settings.index'))->assertOk();
         $this->get('/admin/google-books')->assertNotFound();

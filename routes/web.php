@@ -27,6 +27,12 @@ Route::middleware('guest')->group(function (): void {
 
 Route::post('/logout', [AuthController::class, 'destroy'])->middleware('auth')->name('logout');
 
+Route::delete('cards/destroy-all', [CardController::class, 'destroyAll'])->name('admin.cards.destroy-all');
+
+Route::delete('cards/destroy-selected', [CardController::class, 'destroySelected'])->name('admin.cards.destroy-selected');
+
+Route::get('cards/export', [ImportExportController::class, 'export'])->name('cards.export')->middleware('can:active');
+
 Route::middleware(['auth', 'can:active'])->group(function (): void {
     Route::get('/account/settings', [AccountController::class, 'edit'])->name('account.edit');
     Route::put('/account/settings', [AccountController::class, 'update'])->name('account.update');
@@ -65,6 +71,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:admin', 'can:ac
     Route::post('users', [Admin\UserController::class, 'store'])->name('users.store');
     Route::get('users/{user}/edit', [Admin\UserController::class, 'edit'])->name('users.edit');
     Route::put('users/{user}', [Admin\UserController::class, 'update'])->name('users.update');
+    Route::get('users/{user}/detail', [Admin\UserController::class, 'detail'])->name('users.detail');
 
     Route::get('cards', [Admin\CardController::class, 'index'])->name('cards.index');
     Route::get('cards/create', [Admin\CardController::class, 'create'])->name('cards.create');
@@ -72,7 +79,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'can:admin', 'can:ac
     Route::get('cards/{card}/edit', [Admin\CardController::class, 'edit'])->name('cards.edit');
     Route::put('cards/{card}', [Admin\CardController::class, 'update'])->name('cards.update');
     Route::post('cards/{card}/lost', [Admin\CardController::class, 'markLost'])->name('cards.lost');
+
+    Route::post('cards/{card}/completed', [Admin\CardController::class, 'markCompleted'])->name('cards.completed');
+
+    Route::post('cards/mark-completed-all', [CardController::class, 'markCompletedAll'])->name('cards.mark-completed-all');
     Route::post('cards/{card}/replace', [Admin\CardController::class, 'replace'])->name('cards.replace');
+
+    Route::get('cards/issue/{user}', [Admin\CardController::class, 'issue'])->name('cards.issue');
 
     Route::get('import-export', [Admin\ImportExportController::class, 'index'])->name('import-export.index');
     Route::post('import-export/import', [Admin\ImportExportController::class, 'import'])->name('import-export.import');

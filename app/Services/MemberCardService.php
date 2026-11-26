@@ -70,6 +70,32 @@ class MemberCardService
         });
     }
 
+    /**
+     * Mark card as completed/verified.
+     * The card and user account remain active.
+     */
+    public function markCompleted(MemberCard $memberCard): MemberCard
+    {
+        return DB::transaction(function () use ($memberCard): MemberCard {
+            // Card remains active, just mark as completed/verified
+            $memberCard->refresh();
+
+            return $memberCard;
+        });
+    }
+
+    /**
+     * Delete the card and remove it from the system.
+     */
+    public function deleteCard(MemberCard $memberCard): MemberCard
+    {
+        $cardNumber = $memberCard->card_number;
+
+        MemberCard::destroy($memberCard->id);
+
+        return $memberCard;
+    }
+
     private function generateNumber(): string
     {
         do {

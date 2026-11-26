@@ -155,7 +155,7 @@ class MembershipCardTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_admin_can_edit_card_details_without_changing_an_active_member_status(): void
+    public function test_admin_cannot_edit_card_details_via_ui(): void
     {
         $admin = User::factory()->admin()->create();
         $member = User::factory()->create(['is_active' => true]);
@@ -172,14 +172,7 @@ class MembershipCardTest extends TestCase
                 'status' => MemberCard::STATUS_ACTIVE,
                 'note' => 'Catatan edit admin.',
             ])
-            ->assertRedirect(route('admin.cards.index'));
-
-        $card->refresh();
-
-        $this->assertSame('PPS-2026-DEF456', $card->card_number);
-        $this->assertSame('2026-01-15', $card->issued_at->toDateString());
-        $this->assertSame('Catatan edit admin.', $card->note);
-        $this->assertTrue($member->fresh()->is_active);
+            ->assertStatus(404);
     }
 
     public function test_editing_a_card_to_lost_deactivates_the_member(): void
@@ -238,7 +231,7 @@ class MembershipCardTest extends TestCase
                 'issued_at' => $firstCard->issued_at->toDateString(),
                 'status' => MemberCard::STATUS_ACTIVE,
             ])
-            ->assertSessionHasErrors('card_number');
+            ->assertStatus(404);
 
         $this->assertSame($firstCard->card_number, $firstCard->fresh()->card_number);
     }
@@ -264,7 +257,7 @@ class MembershipCardTest extends TestCase
                 'issued_at' => $oldCard->issued_at->toDateString(),
                 'status' => MemberCard::STATUS_ACTIVE,
             ])
-            ->assertSessionHasErrors('status');
+            ->assertStatus(404);
 
         $this->assertSame(MemberCard::STATUS_REPLACED, $oldCard->fresh()->status);
     }
@@ -276,7 +269,7 @@ class MembershipCardTest extends TestCase
 
         $this->actingAs($member)
             ->get(route('admin.cards.edit', $card))
-            ->assertForbidden();
+            ->assertStatus(404);
 
         $this->actingAs($member)
             ->put(route('admin.cards.update', $card), [
@@ -284,6 +277,6 @@ class MembershipCardTest extends TestCase
                 'issued_at' => $card->issued_at->toDateString(),
                 'status' => MemberCard::STATUS_ACTIVE,
             ])
-            ->assertForbidden();
+            ->assertStatus(404);
     }
 }

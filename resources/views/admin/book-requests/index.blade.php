@@ -5,14 +5,7 @@
 @section('content')
     <x-page-header title="Pengajuan Buku Baru" subtitle="Daftar usulan anggota beserta vote dan alasan dari anggota lain.">
         <x-slot:actions>
-            <form method="POST" action="{{ route('admin.book-requests.destroy-all') }}" data-confirm="Hapus semua pengajuan beserta vote-nya?">
-                @csrf
-                @method('DELETE')
-                <button type="submit" class="btn btn-danger">
-                    <x-icon name="trash" class="h-4 w-4" />
-                    Hapus Semua
-                </button>
-            </form>
+            <!-- Tombol Hapus Semua dihapus -->
         </x-slot:actions>
     </x-page-header>
 
